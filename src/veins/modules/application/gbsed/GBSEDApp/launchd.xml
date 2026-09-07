@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <copy file="gbsed.net.xml" />
+    <copy file="gbsed.rou.xml" />
+    <copy file="gbsed.sumo.cfg" type="config" />
+</launch>

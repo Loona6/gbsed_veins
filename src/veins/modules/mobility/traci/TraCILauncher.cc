@@ -25,6 +25,7 @@
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #else
 #include <sys/wait.h>
+#include <csignal>
 #endif
 
 #include "veins/modules/mobility/traci/TraCILauncher.h"

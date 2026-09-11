@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <routes>
-    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="15"/>
-    <route id="route0" edges="A0A1"/>
-    <vehicle id="veh0" type="car" route="route0" depart="0"/>
-    <vehicle id="veh1" type="car" route="route0" depart="1"/>
+    <!-- maxSpeed 8 m/s over a 1000 m edge, so each vehicle lives about 125 s.
+         That outlasts the whole send queue (t=10 to t=62.5), so delivery is
+         governed by distance alone and not by the sender vanishing. -->
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="8"/>
+
+    <!--
+        veh0 (node[0], the sender) heads north from A0(0,0) to A1(0,1000).
+        veh1 (node[1], the receiver) heads east  from A0(0,0) to B0(1000,0).
+
+        They leave the same junction at right angles, so their separation
+        grows as sqrt(2)*8*t: about 110 m at the first send and 710 m at the
+        last. The 802.11p range cliff sits near 450 m, so the sequence
+        crosses it mid-run. That sweep is what turns a delivery run into a
+        fidelity-versus-distance measurement.
+    -->
+    <route id="north" edges="A0A1"/>
+    <route id="east"  edges="A0B0"/>
+
+    <vehicle id="veh0" type="car" route="north" depart="0"/>
+    <vehicle id="veh1" type="car" route="east"  depart="0"/>
 </routes>

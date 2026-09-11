@@ -81,3 +81,12 @@ subprojects/veins_testsims/sim/**/.qtenvrc
 subprojects/veins_testsims/sim/**/.cmdenv-log
 subprojects/veins_testsims/sim/**/valgrind.out
 subprojects/veins_testsims/opp_tests/**/work
+
+# per-machine launcher overrides
+run_gbsed.local
+
+# GBSED scenario run artifacts
+src/veins/modules/application/gbsed/GBSEDApp/scene_data/
+src/veins/modules/application/gbsed/GBSEDApp/received/
+src/veins/modules/application/gbsed/GBSEDApp/results/
+src/veins/modules/application/gbsed/GBSEDApp/.qtenvrc

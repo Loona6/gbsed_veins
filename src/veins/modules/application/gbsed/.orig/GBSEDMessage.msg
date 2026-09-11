@@ -9,6 +9,4 @@ packet GBSEDMessage extends BaseFrame1609_4 {
     string chunkData;
     string fileName;      // basename of the file this chunk belongs to
     bool isLastFile = false; // true if this is the last file in the send queue
-    double txPosX;        // sender position at transmit time, for range analysis
-    double txPosY;
 }

@@ -25,14 +25,10 @@ private:
 
     std::string outputDir;
     int chunkSizeBytes = 1000;
-    simtime_t startTime;
-    simtime_t sendInterval;
-    bool writeCsvLog = true;
 
     std::vector<uint8_t> fileBuffer;
     int totalChunks = 0;
     int nextChunkToSend = 0;
-    int chunksSentCount = 0;
 
     // --- Receiver: tracks the file currently being assembled ---
     std::string currentReceivingFile;
@@ -41,7 +37,6 @@ private:
     int chunksReceivedCount = 0;
     bool fileWritten = false;
     int filesReceivedCount = 0;
-    int chunksHeardCount = 0;
 
     cMessage* sendChunkEvt = nullptr;
 
@@ -49,10 +44,6 @@ private:
     void sendNextChunk();
     void writeReceivedFile();
     void startNewReceivedFile(const std::string& fileName, int totalSize, int totalChunksForFile);
-
-    // One row per chunk, so delivery can be correlated with distance offline.
-    void logChunk(const std::string& file, const std::string& fileName, int chunkIndex,
-        int totalChunksForFile, double txX, double txY, double rxX, double rxY, double distance);
 
     static std::string base64Encode(const uint8_t* data, size_t len);
     static std::vector<uint8_t> base64Decode(const std::string& encoded);

@@ -1,0 +1,8 @@
+# Shell scripts and the Python tooling must keep LF endings, otherwise a clone
+# made on Windows fails in WSL with "bad interpreter: /usr/bin/env python3^M".
+*.sh    text eol=lf
+*.py    text eol=lf
+run     text eol=lf
+configure text eol=lf
+bin/veins_run     text eol=lf
+bin/veins_launchd text eol=lf

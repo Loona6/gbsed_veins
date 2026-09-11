@@ -5,8 +5,6 @@
 #include <sstream>
 #include <filesystem>
 #include <system_error>
-#include <cmath>
-#include <ostream>
 
 using namespace veins;
 
@@ -82,17 +80,6 @@ void GBSEDApp::initialize(int stage)
         isSender = par("isSender").boolValue();
         outputDir = par("outputDir").stdstringValue();
         chunkSizeBytes = par("chunkSize").intValue();
-        startTime = par("startTime").doubleValue();
-        sendInterval = par("sendInterval").doubleValue();
-        writeCsvLog = par("writeCsvLog").boolValue();
-
-        // logChunk() appends, so a stale log from an earlier run would merge
-        // into this one's. Each node clears only the file it writes.
-        if (writeCsvLog) {
-            std::error_code ec;
-            std::filesystem::path dir(outputDir.empty() ? "." : outputDir);
-            std::filesystem::remove(dir / (isSender ? "tx_log.csv" : "rx_log.csv"), ec);
-        }
 
         if (isSender) {
             std::string rawPaths = par("filePath").stdstringValue();
@@ -110,7 +97,7 @@ void GBSEDApp::initialize(int stage)
 
             sendChunkEvt = new cMessage("sendChunkEvt");
             // Wait well past typical TraCI vehicle-creation delay before first send
-            scheduleAt(simTime() + startTime, sendChunkEvt);
+            scheduleAt(simTime() + 10.0, sendChunkEvt);
         }
     }
 }
@@ -147,7 +134,7 @@ void GBSEDApp::handleSelfMsg(cMessage* msg)
             currentFileIndex++;
             if (currentFileIndex < (int)filePaths.size()) {
                 loadFile();
-                scheduleAt(simTime() + sendInterval, sendChunkEvt);
+                scheduleAt(simTime() + 2.0, sendChunkEvt);
             }
             else {
                 EV_INFO << "GBSEDApp: all " << filePaths.size()
@@ -157,7 +144,7 @@ void GBSEDApp::handleSelfMsg(cMessage* msg)
             return;
         }
 
-        scheduleAt(simTime() + sendInterval, sendChunkEvt);
+        scheduleAt(simTime() + 2.0, sendChunkEvt);
         return;
     }
     DemoBaseApplLayer::handleSelfMsg(msg);
@@ -183,56 +170,9 @@ void GBSEDApp::sendNextChunk()
     msg->setFileName(fname.c_str());
     msg->setIsLastFile(currentFileIndex == (int)filePaths.size() - 1);
 
-    // Carried so the receiver can work out how far apart the two vehicles were
-    // when this chunk went out; without it, a lost chunk has no distance.
-    msg->setTxPosX(curPosition.x);
-    msg->setTxPosY(curPosition.y);
-
     sendDown(msg);
-    chunksSentCount++;
-    logChunk("tx_log.csv", fname, nextChunkToSend, totalChunks,
-        curPosition.x, curPosition.y, NAN, NAN, NAN);
     EV_INFO << "GBSEDApp: sent chunk " << nextChunkToSend << "/" << totalChunks
-            << " of '" << fname << "' from (" << curPosition.x << ", "
-            << curPosition.y << ")" << endl;
-}
-
-void GBSEDApp::logChunk(const std::string& file, const std::string& fileName, int chunkIndex,
-    int totalChunksForFile, double txX, double txY, double rxX, double rxY, double distance)
-{
-    if (!writeCsvLog) return;
-
-    std::filesystem::path dir(outputDir.empty() ? "." : outputDir);
-    std::error_code ec;
-    std::filesystem::create_directories(dir, ec);
-    if (ec) {
-        EV_WARN << "GBSEDApp: cannot create '" << dir.string()
-                << "' for the CSV log: " << ec.message() << endl;
-        return;
-    }
-
-    std::filesystem::path path = dir / file;
-    bool needHeader = !std::filesystem::exists(path);
-    std::ofstream out(path, std::ios::app);
-    if (!out) {
-        EV_WARN << "GBSEDApp: cannot append to " << path.string() << endl;
-        return;
-    }
-    if (needHeader) {
-        out << "fileName,chunkIndex,totalChunks,simTime,txX,txY,rxX,rxY,distance\n";
-    }
-    // NAN means "not applicable on this side" and is written as an empty cell.
-    auto cell = [](std::ostream& os, double v) -> std::ostream& {
-        if (!std::isnan(v)) os << v;
-        return os;
-    };
-    out << fileName << ',' << chunkIndex << ',' << totalChunksForFile << ','
-        << simTime().dbl() << ',';
-    cell(out, txX) << ',';
-    cell(out, txY) << ',';
-    cell(out, rxX) << ',';
-    cell(out, rxY) << ',';
-    cell(out, distance) << '\n';
+            << " of '" << fname << "'" << endl;
 }
 
 void GBSEDApp::startNewReceivedFile(const std::string& fileName, int totalSize, int totalChunksForFile)
@@ -264,12 +204,6 @@ void GBSEDApp::onWSM(BaseFrame1609_4* wsm)
         }
         startNewReceivedFile(incomingFile, gmsg->getTotalSize(), gmsg->getTotalChunks());
     }
-
-    Coord txPos(gmsg->getTxPosX(), gmsg->getTxPosY(), curPosition.z);
-    double distance = curPosition.distance(txPos);
-    chunksHeardCount++;
-    logChunk("rx_log.csv", incomingFile, gmsg->getChunkIndex(), gmsg->getTotalChunks(),
-        txPos.x, txPos.y, curPosition.x, curPosition.y, distance);
 
     int idx = gmsg->getChunkIndex();
     if (idx < (int)chunkReceived.size() && !chunkReceived[idx]) {
@@ -330,18 +264,7 @@ void GBSEDApp::finish()
         cancelAndDelete(sendChunkEvt);
         sendChunkEvt = nullptr;
     }
-    if (isSender) {
-        EV_INFO << "GBSEDApp: sender finished. Chunks transmitted: " << chunksSentCount
-                << " of " << filePaths.size() << " queued file(s); reached file "
-                << currentFileIndex << "." << endl;
-        recordScalar("chunksSent", chunksSentCount);
-        recordScalar("filesQueued", (long)filePaths.size());
-        recordScalar("filesStarted", currentFileIndex);
-    }
-    else {
-        EV_INFO << "GBSEDApp: receiver finished. Files completed: " << filesReceivedCount
-                << "; chunks heard: " << chunksHeardCount << endl;
-        recordScalar("filesReceived", filesReceivedCount);
-        recordScalar("chunksHeard", chunksHeardCount);
+    if (!isSender) {
+        EV_INFO << "GBSEDApp: receiver finished. Files completed: " << filesReceivedCount << endl;
     }
 }

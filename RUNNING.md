@@ -1,5 +1,8 @@
 # Running the GBSED pipeline over Veins
 
+> For architecture, invariants and machine-configuration guidance, see
+> **`overview.md`**. This file is the step-by-step run guide.
+
 End-to-end: a folder of driving images becomes scene graphs, the scene graphs
 are serialized and transmitted between two vehicles over IEEE 802.11p in
 OMNeT++/Veins with SUMO mobility, and the receiver's bytes are decoded back

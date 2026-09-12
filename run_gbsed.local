@@ -1,0 +1,4 @@
+# Machine-local settings for run_gbsed.sh (not tracked by git).
+SUMO_BIN="$HOME/Documents/omnet-projects/sumo-venv/bin/sumo"
+OPP_WORKSPACE="$HOME/Documents/omnet-projects"
+OPP_ENV_NAME="omnetpp-6.4.0"

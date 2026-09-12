@@ -1,0 +1,97 @@
+file 36929 1788850015                                           
+version 3
+run General-0-20260908-12:46:55-74769
+attr configname General
+attr datetime 20260908-12:46:55
+attr datetimef 20260908-124655
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsd ""
+attr iterationvarsf ""
+attr measurement ""
+attr network GBSEDScenario
+attr processid 74769
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+config image-path /Users/mahdisahil/Documents/gbsed_veins/images
+config cmdenv-express-mode true
+config cmdenv-autoflush true
+config cmdenv-status-frequency 1s
+config **.cmdenv-log-level info
+config network GBSEDScenario
+config debug-on-errors true
+config cmdenv-interactive false
+config sim-time-limit 200s
+config **.scalar-recording true
+config **.vector-recording true
+config *.playgroundSizeX 2500m
+config *.playgroundSizeY 2500m
+config *.playgroundSizeZ 50m
+config *.annotations.draw true
+config *.manager.updateInterval 1s
+config *.manager.host "\"localhost\""
+config *.manager.port 9999
+config *.manager.autoShutdown true
+config *.manager.launchConfig "xmldoc(\"launchd.xml\")"
+config *.connectionManager.sendDirect true
+config *.connectionManager.maxInterfDist 2600m
+config *.connectionManager.drawMaxIntfDist false
+config *.**.nic.mac1609_4.useServiceChannel false
+config *.**.nic.mac1609_4.txPower 20mW
+config *.**.nic.mac1609_4.bitrate 6Mbps
+config *.**.nic.phy80211p.minPowerLevel -110dBm
+config *.**.nic.phy80211p.useNoiseFloor true
+config *.**.nic.phy80211p.noiseFloor -98dBm
+config *.**.nic.phy80211p.decider "xmldoc(\"config.xml\")"
+config *.**.nic.phy80211p.analogueModels "xmldoc(\"config.xml\")"
+config *.**.nic.phy80211p.usePropagationDelay true
+config *.**.nic.phy80211p.antenna "xmldoc(\"antenna.xml\", \"/root/Antenna[@id='monopole']\")"
+config *.node[*].nic.phy80211p.antennaOffsetY "0 m"
+config *.node[*].nic.phy80211p.antennaOffsetZ "1.895 m"
+config *.node[*].applType "\"org.car2x.veins.modules.application.gbsed.GBSEDApp\""
+config *.node[*].appl.headerLength "80 bit"
+config *.node[*].appl.sendBeacons false
+config *.node[*].appl.dataOnSch false
+config *.node[*].appl.beaconInterval 1s
+config *.node[0].appl.isSender true
+config *.node[0].appl.filePath "\"scene_data/frame_0000.bin;scene_data/frame_0001.bin;scene_data/frame_0002.bin;scene_data/frame_0003.bin;scene_data/frame_0004.bin;scene_data/frame_0005.bin;scene_data/frame_0006.bin;scene_data/frame_0007.bin;scene_data/frame_0008.bin;scene_data/frame_0009.bin;scene_data/frame_0010.bin;scene_data/frame_0011.bin;scene_data/frame_0012.bin;scene_data/frame_0013.bin;scene_data/frame_0014.bin;scene_data/frame_0015.bin;scene_data/frame_0016.bin;scene_data/frame_0017.bin;scene_data/frame_0018.bin;scene_data/frame_0019.bin\""
+config *.node[1].appl.isSender false
+config *.node[1].appl.outputDir "\"received\""
+config *.node[0].appl.outputDir "\"received\""
+config *.node[*].appl.startTime 10s
+config *.node[*].appl.sendInterval 2.5s
+config *.node[*].appl.writeCsvLog true
+config *.node[*].veinsmobility.x 0
+config *.node[*].veinsmobility.y 0
+config *.node[*].veinsmobility.z 0
+config *.node[*].veinsmobility.setHostSpeed false
+
+vector 0 GBSEDScenario.node[0].nic.phy80211p RadioState ETV
+vector 1 GBSEDScenario.node[0].nic.phy80211p RadioChannel ETV
+vector 2 GBSEDScenario.manager posx ETV
+vector 3 GBSEDScenario.manager posy ETV
+vector 4 GBSEDScenario.node[1].nic.phy80211p RadioState ETV
+vector 5 GBSEDScenario.node[1].nic.phy80211p RadioChannel ETV
+vector 6 GBSEDScenario.manager posx ETV
+vector 7 GBSEDScenario.manager posy ETV
+vector 8 GBSEDScenario.manager speed ETV
+vector 9 GBSEDScenario.manager speed ETV
+vector 10 GBSEDScenario.manager acceleration ETV
+vector 11 GBSEDScenario.manager co2emission ETV
+vector 12 GBSEDScenario.manager acceleration ETV
+vector 13 GBSEDScenario.manager co2emission ETV
+11	3802 3161 4 461 3 136 134 0.973 5.758318013857487 226.18104056170432 467.98213676262196
+10	6963 4013 4 461 3 136 134 -0.9908414663048459 2.585551230516284 5.974516504304483 41.00447347561515
+8	10976 3649 3 461 2 136 135 1.464541775570251 7.988466025539674 987.1143430181779 7283.824132692515
+3	14625 3695 2 461 1 136 136 29.585656981822012 1016.7 71995.85138280809 49564884.87091669
+2	18320 1901 2 461 1 136 136 26.6 26.6 3617.6000000000004 96228.16
+13	20221 3211 4 461 3 136 134 0.973 4.584670330842007 233.66459486159042 498.25935625701237
+12	23432 4005 4 461 3 136 134 -1.2316714343149213 2.1262006659992037 5.153963082516565 46.5619470173977
+9	27437 3639 3 461 2 136 135 2.586513594398275 7.990193969942629 986.2543656207156 7255.986576443028
+7	31076 2173 2 461 1 136 136 1026.6 1026.6 139617.59999999998 143331428.15999997
+6	33249 3679 2 461 1 136 136 33.3 1019.5543656207151 70983.69837894414 48277102.6324772
+

@@ -133,11 +133,19 @@ its path under `src/veins`, or NED loading fails outright.
 
 ## 4. Configure the launcher
 
-`run_gbsed.sh` discovers SUMO and decides whether to wrap the run in
-`opp_env`. On a normal Linux/WSL install with `opp_run` and `sumo` on your
-PATH, it needs no configuration at all.
+`run_gbsed.sh` works out its own environment and normally needs **no
+configuration at all**. It:
 
-If it guesses wrong, put overrides in `run_gbsed.local` (git-ignored):
+- finds `sumo` on your PATH (or via `$SUMO_HOME/bin/sumo`);
+- derives `SUMO_HOME` by following the binary through any symlinks and
+  checking the system, pip-wheel and source-build layouts;
+- decides whether OMNeT++ needs wrapping by actually invoking `opp_run` —
+  an `opp_env`-managed install puts it on PATH but refuses to run outside
+  its shell, so merely finding the binary proves nothing;
+- if wrapping is needed, locates the opp_env workspace by looking for the
+  `.opp_env_workspace` marker, and picks the `omnetpp-*` project inside it.
+
+If any of that guesses wrong, put overrides in `run_gbsed.local` (git-ignored):
 
 ```bash
 cp run_gbsed.local.example run_gbsed.local
@@ -146,8 +154,10 @@ cp run_gbsed.local.example run_gbsed.local
 | variable | meaning |
 |---|---|
 | `SUMO_BIN` | path to `sumo` if not on PATH |
+| `SUMO_HOME` | SUMO data directory, if the derivation fails |
 | `USE_OPP_ENV` | force `0` (plain install) or `1` (opp_env); default is to probe |
-| `OPP_ENV_NAME`, `OPP_WORKSPACE` | only when `USE_OPP_ENV=1` |
+| `OPP_WORKSPACE` | the directory containing `.opp_env_workspace` |
+| `OPP_ENV_NAME` | e.g. `omnetpp-6.4.0`; defaults to the first `omnetpp-*` in the workspace |
 | `VEINS_PORT` | `veins_launchd` port, default 9999 |
 
 Also export this once, so the Python tools know where the scenario is:
@@ -328,7 +338,9 @@ how a `LOST` frame still reports the range at which it was dropped.
 
 | symptom | cause and fix |
 |---|---|
-| `This OMNeT++ installation cannot be used outside an opp_env shell` | Set `USE_OPP_ENV=1` in `run_gbsed.local` and give `OPP_ENV_NAME`/`OPP_WORKSPACE`. |
+| `This OMNeT++ installation cannot be used outside an opp_env shell` | You ran `make` or `opp_run` directly. Go through `run_gbsed.sh`, or wrap the command in `opp_env run`. |
+| `'<dir>' is not an opp_env workspace, run 'opp_env init'` | The workspace auto-detection picked the wrong directory, or you set `OPP_WORKSPACE` to one. The right directory is the one containing a `.opp_env_workspace` file — find it with `find ~ -maxdepth 4 -name .opp_env_workspace`. |
+| `No opp_env workspace found in ... or its parent directories` | You ran `opp_env shell` from the Veins checkout. Run it from the workspace directory instead — but `run_gbsed.sh` does this for you, so you should not need to. |
 | `error: no 'sumo' on PATH` | Install SUMO or set `SUMO_BIN` in `run_gbsed.local`. |
 | `TraCI server reports unsupported TraCI API version: 22` | SUMO too new. Veins 5.3.1 accepts API 15–21 (`TraCICommandInterface.cc`). SUMO 1.21.0 reports 21. |
 | `Attempted to read past end of byte buffer` in `getVersion()` | SUMO died at startup — usually a malformed `.rou.xml` or `.net.xml`. **Note `--` is illegal inside an XML comment.** Test directly: `sumo -c gbsed.sumo.cfg --no-step-log --end 80`. |

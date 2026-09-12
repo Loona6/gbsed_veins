@@ -1,17 +1,23 @@
-# Copy to run_gbsed.local and edit. Every value is optional -- set only what
-# the script guesses wrong on your machine. See RUNNING.md.
+# Copy to run_gbsed.local and edit. Everything here is OPTIONAL -- the script
+# auto-detects SUMO, SUMO_HOME, the opp_env workspace and the OMNeT++ project
+# name. Set a value only if the guess is wrong on your machine.
+# See RUNNING.md section 4.
 
 # Path to the sumo binary, if it is not on your PATH.
 #SUMO_BIN="$HOME/sumo/bin/sumo"
 
-# Force the run mode instead of probing for opp_run:
-#   0 = plain OMNeT++ install (opp_run on PATH)  <- the usual Linux/WSL case
+# SUMO's data directory, if the script cannot derive it from the binary.
+#SUMO_HOME="/usr/share/sumo"
+
+# Force the run mode instead of probing opp_run:
+#   0 = plain OMNeT++ install (opp_run works)  <- the usual Linux/WSL case
 #   1 = opp_env-managed install
 #USE_OPP_ENV=0
 
-# Only used when USE_OPP_ENV=1.
+# Only used when USE_OPP_ENV=1. OPP_WORKSPACE is the directory that contains
+# a .opp_env_workspace file:  find ~ -maxdepth 4 -name .opp_env_workspace
+#OPP_WORKSPACE="$HOME/Documents/omnet-projects"
 #OPP_ENV_NAME="omnetpp-6.4.0"
-#OPP_WORKSPACE="$HOME/omnetpp-workspace"
 
 # Port veins_launchd listens on; change if 9999 is taken.
 #VEINS_PORT=9999

@@ -28,6 +28,7 @@ private:
     simtime_t startTime;
     simtime_t sendInterval;
     bool writeCsvLog = true;
+    bool writePartialFiles = true;
 
     std::vector<uint8_t> fileBuffer;
     int totalChunks = 0;
@@ -41,13 +42,14 @@ private:
     int chunksReceivedCount = 0;
     bool fileWritten = false;
     int filesReceivedCount = 0;
+    int filesPartialCount = 0;
     int chunksHeardCount = 0;
 
     cMessage* sendChunkEvt = nullptr;
 
     void loadFile();
     void sendNextChunk();
-    void writeReceivedFile();
+    void writeReceivedFile(bool partial = false);
     void startNewReceivedFile(const std::string& fileName, int totalSize, int totalChunksForFile);
 
     // One row per chunk, so delivery can be correlated with distance offline.

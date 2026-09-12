@@ -85,6 +85,7 @@ void GBSEDApp::initialize(int stage)
         startTime = par("startTime").doubleValue();
         sendInterval = par("sendInterval").doubleValue();
         writeCsvLog = par("writeCsvLog").boolValue();
+        writePartialFiles = par("writePartialFiles").boolValue();
 
         // logChunk() appends, so a stale log from an earlier run would merge
         // into this one's. Each node clears only the file it writes.
@@ -261,6 +262,13 @@ void GBSEDApp::onWSM(BaseFrame1609_4* wsm)
                     << "' but previous file '" << currentReceivingFile
                     << "' was never fully received (" << chunksReceivedCount
                     << "/" << chunkReceived.size() << " chunks)" << endl;
+            // Hand it over anyway: with a slice-aligned payload the blocks
+            // that did arrive still decode. Dropping it here is what made
+            // partial delivery indistinguishable from total loss.
+            if (writePartialFiles && chunksReceivedCount > 0) {
+                writeReceivedFile(true);
+                filesPartialCount++;
+            }
         }
         startNewReceivedFile(incomingFile, gmsg->getTotalSize(), gmsg->getTotalChunks());
     }
@@ -294,7 +302,7 @@ void GBSEDApp::onWSM(BaseFrame1609_4* wsm)
     }
 }
 
-void GBSEDApp::writeReceivedFile()
+void GBSEDApp::writeReceivedFile(bool partial)
 {
     // outputDir may or may not carry a trailing separator; normalise before joining.
     std::filesystem::path dir(outputDir.empty() ? "." : outputDir);
@@ -319,8 +327,13 @@ void GBSEDApp::writeReceivedFile()
         throw cRuntimeError("GBSEDApp: failed while writing '%s'", outPath.c_str());
     }
 
-    EV_INFO << "GBSEDApp: wrote received file to " << outPath.string()
-            << " (" << receivedBuffer.size() << " bytes)" << endl;
+    EV_INFO << "GBSEDApp: wrote " << (partial ? "PARTIAL " : "")
+            << "received file to " << outPath.string() << " ("
+            << receivedBuffer.size() << " bytes"
+            << (partial ? ", " + std::to_string(chunksReceivedCount) + "/"
+                          + std::to_string(chunkReceived.size()) + " chunks"
+                        : "")
+            << ")" << endl;
 }
 
 void GBSEDApp::finish()
@@ -339,9 +352,18 @@ void GBSEDApp::finish()
         recordScalar("filesStarted", currentFileIndex);
     }
     else {
+        // The last file in the queue never triggers a file switch, so an
+        // incomplete one would otherwise be dropped here.
+        if (writePartialFiles && !currentReceivingFile.empty()
+            && !fileWritten && chunksReceivedCount > 0) {
+            writeReceivedFile(true);
+            filesPartialCount++;
+        }
         EV_INFO << "GBSEDApp: receiver finished. Files completed: " << filesReceivedCount
+                << "; partial: " << filesPartialCount
                 << "; chunks heard: " << chunksHeardCount << endl;
         recordScalar("filesReceived", filesReceivedCount);
+        recordScalar("filesPartial", filesPartialCount);
         recordScalar("chunksHeard", chunksHeardCount);
     }
 }

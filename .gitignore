@@ -90,3 +90,8 @@ src/veins/modules/application/gbsed/GBSEDApp/scene_data/
 src/veins/modules/application/gbsed/GBSEDApp/received/
 src/veins/modules/application/gbsed/GBSEDApp/results/
 src/veins/modules/application/gbsed/GBSEDApp/.qtenvrc
+
+# macOS Finder metadata. Eleven of these are already tracked from an earlier
+# commit; untrack them with:
+#   git rm --cached $(git ls-files | grep DS_Store)
+.DS_Store

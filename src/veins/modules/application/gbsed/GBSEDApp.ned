@@ -21,4 +21,12 @@ simple GBSEDApp extends DemoBaseApplLayer
         // Append one row per sent/received chunk to tx_log.csv / rx_log.csv
         // in outputDir, so delivery can be correlated with distance.
         bool writeCsvLog = default(true);
+
+        // Write files that never completed, zero-filled where chunks are
+        // missing. Required by the slice-aligned (v2) payload format, whose
+        // whole point is that a partial payload still decodes: each block is
+        // self-describing, so the decoder skips the zeroed ones and recovers
+        // the relations that did arrive. Harmless for v1, which cannot parse
+        // a truncated payload and reports it as CORRUPT.
+        bool writePartialFiles = default(true);
 }

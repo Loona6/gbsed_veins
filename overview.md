@@ -95,7 +95,7 @@ set `ROADSCENE2VEC_HOME`.
 
 ---
 
-## 3. Invariants that break silently
+## 3. Invariants that break silently (nine of them)
 
 These are the things that produce *plausible wrong answers* rather than errors.
 Treat them as constraints when editing.
@@ -136,6 +136,19 @@ mismatch. Always validate directly:
 **6. Generated message files are gitignored.** `GBSEDMessage_m.{h,cc}` are
 produced by `opp_msgc` from the `.msg` at build time and excluded by
 `.gitignore`. Never edit or commit them; edit the `.msg` and rebuild.
+
+**8. A v2 block must hold the node block plus one slice.** Slices are 2·N²
+bytes, so `chunkSize` has a floor that rises with scene density —
+`gbsed_semantic.min_chunk_size()` computes it (434 B for seq1). `pack_sliced`
+raises rather than silently splitting a slice.
+
+**9. Payloads are reproducible as graphs, not as bytes.** The same images
+re-encoded on a different platform gave 17/20 byte-identical payloads; the
+rest differed by one ULP in a single float16 feature (cross-platform floating
+point in the detector or the BEV projection). Extracted graphs were identical
+in all 20. Compare graphs across machines, not payload hashes — the decoder's
+`bit_exact` column checks SHA-256 against `meta.json` and will flip if the
+reference was encoded elsewhere.
 
 **7. Frames are numbered, not cleaned.** The encoder writes `frame_0000…`
 and deletes nothing. A leftover frame from a previous run appears in results
